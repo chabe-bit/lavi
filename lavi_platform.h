@@ -22,7 +22,7 @@
     if (!(x)) { lavi_MessageBoxA(0, #x, "Assertion Failure", MB_OK); __debugbreak();  }
 
 
-#if __STDC_VERSION__ > 199901L
+#if __STDC_VERSION__ >= 199901L
 #include <stdint.h>	
 typedef uint8_t					u8;
 typedef uint16_t				u16;
