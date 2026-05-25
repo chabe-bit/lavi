@@ -78,7 +78,7 @@ Linking in your own functions from Win32 API:
 
     // Every function dynamically linked then is prefixed wtih lavi_
     // Here's how you call it:
-    lavi_Hid_Caps(...);
+    lavi_Hid_GetCaps(...);
 
     NOTE: if you are curious, yes you can debug/step through through this API 
 
