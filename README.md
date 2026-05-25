@@ -21,7 +21,7 @@ All you need to start is to include the header file and call two functions, lavi
 
 static lavi_api g_api;
 
-// lavi_main is wrapped around WinMain but is required and designed as a simpler entry point 
+// lavi_main is wrapped around WinMain but is required and designed for a simpler entry point 
 void lavi_main(int argc, char **argv)
 {
     // Optional: Define window yourself, otherwise will be set to default values  
