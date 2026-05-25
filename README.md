@@ -99,7 +99,7 @@ Linking in your own functions from Win32 API:
     NTSTATUS HidP_GetCaps(...);
 
     // Provide it like this, prereq understanding of C macro syntax is important. 
-    LAVI_WINFUNC(hid,      HidP_GetCaps,                s32,                        (void *ppd, HIDP_CAPS *caps)) \
+    LAVI_WINFUNC(hid,      HidP_GetCaps,                int,                        (void *ppd, HIDP_CAPS *caps)) \
 
     // Every function dynamically linked then is prefixed wtih lavi_
     // Here's how you call it:
