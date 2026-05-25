@@ -22,17 +22,7 @@
     if (!(x)) { lavi_MessageBoxA(0, #x, "Assertion Failure", MB_OK); __debugbreak();  }
 
 
-#if __STDC_VERSION__ >= 199901L
-typedef unsigned char			u8;
-typedef unsigned short			u16;
-typedef unsigned int			u32;
-typedef unsigned long long int	u64;
-
-typedef signed char				s8;
-typedef signed short			s16;
-typedef signed int				s32;
-typedef signed long long int	s64;
-#else 
+#if __STDC_VERSION__ > 199901L
 #include <stdint.h>	
 typedef uint8_t					u8;
 typedef uint16_t				u16;
@@ -43,6 +33,16 @@ typedef uint8_t 				s8;
 typedef uint16_t				s16;
 typedef uint32_t				s32;
 typedef uint64_t				s64;
+#else 
+typedef unsigned char			u8;
+typedef unsigned short			u16;
+typedef unsigned int			u32;
+typedef unsigned long long int	u64;
+
+typedef signed char				s8;
+typedef signed short			s16;
+typedef signed int				s32;
+typedef signed long long int	s64;
 #endif
 
 typedef s32 boolean;
@@ -59,6 +59,7 @@ typedef struct {
 
 // API 
 struct lavi_api;
+extern void lavi_main(int argc, char **argv);
 extern void lavi_init(struct lavi_api *api);
 extern void lavi_update(void);
 extern void lavi_printf(const char *fmt, ...);
@@ -97,14 +98,14 @@ typedef struct {
     POINT       pt;
 } MSG;
 typedef struct {
-    u16                                wButtons;
+    u16                               wButtons;
     u8                                bLeftTrigger;
     u8                                bRightTrigger;
     s16                               sThumbLX;
     s16                               sThumbLY;
     s16                               sThumbRX;
     s16                               sThumbRY;
-} XINPUT_GAMEPAD, *PXINPUT_GAMEPAD;
+} XINPUT_GAMEPAD;
 typedef struct {
     u32                               dwPacketNumber;
     XINPUT_GAMEPAD                      Gamepad;
@@ -185,7 +186,7 @@ typedef struct {
     u16 Flags;
     u16 Reserved;
     u16 VKey;
-    u32   Message;
+    u32 Message;
     u32 ExtraInformation;
 } RAWKEYBOARD;
 typedef struct {
@@ -207,6 +208,132 @@ typedef struct {
     u32 dwFlags;
     void * hwndTarget;    
 } RAWINPUTDEVICE;
+typedef struct {
+  void *hDevice;
+  u32 dwType;
+} RAWINPUTDEVICELIST;
+typedef struct {
+    u32 dwVendorId;
+    u32 dwProductId;
+    u32 dwVersionNumber;
+
+    /*
+     * Top level collection UsagePage and Usage
+     */
+    u16 usUsagePage;
+    u16 usUsage;
+} RID_DEVICE_INFO_HID;
+typedef struct {
+    u32 cbSize;
+    u32 dwType;
+    union {
+        // Removed mouse and keyboard 
+        RID_DEVICE_INFO_HID hid;
+    } param;
+} RID_DEVICE_INFO;
+typedef struct {
+    u16    UsagePage;
+    u8     ReportID;
+    u8     IsAlias;
+
+    u16    BitField;
+    u16    LinkCollection;   // A unique internal index pointer
+
+    u16     LinkUsage;
+    u16     LinkUsagePage;
+
+    u8  IsRange;
+    u8  IsStringRange;
+    u8  IsDesignatorRange;
+    u8  IsAbsolute;
+
+    u16    ReportCount;   // Available in API version >= 2 only.
+
+    u16    Reserved2;
+
+    u32    Reserved[9];
+    union {
+        struct {
+            u16     UsageMin,         UsageMax;
+            u16    StringMin,        StringMax;
+            u16    DesignatorMin,    DesignatorMax;
+            u16    DataIndexMin,     DataIndexMax;
+        } Range;
+        struct  {
+            u16     Usage,            Reserved1;
+            u16    StringIndex,      Reserved2;
+            u16    DesignatorIndex,  Reserved3;
+            u16    DataIndex,        Reserved4;
+        } NotRange;
+    };
+} HIDP_BUTTON_CAPS;
+typedef struct {
+    u16     UsagePage;
+    u8    ReportID;
+    u8  IsAlias;
+
+    u16    BitField;
+    u16    LinkCollection;   // A unique internal index pointer
+
+    u16     LinkUsage;
+    u16     LinkUsagePage;
+
+    u8  IsRange;
+    u8  IsStringRange;
+    u8  IsDesignatorRange;
+    u8  IsAbsolute;
+
+    u8  HasNull;        // Does this channel have a null report   union
+    u8    Reserved;
+    u16    BitSize;        // How many bits are devoted to this value?
+
+    u16    ReportCount;    // See Note below.  Usually set to 1.
+    u16    Reserved2[5];
+
+    u32    UnitsExp;
+    u32    Units;
+
+    s32     LogicalMin,       LogicalMax;
+    s32     PhysicalMin,      PhysicalMax;
+
+    union {
+        struct {
+            u16     UsageMin,         UsageMax;
+            u16    StringMin,        StringMax;
+            u16    DesignatorMin,    DesignatorMax;
+            u16    DataIndexMin,     DataIndexMax;
+        } Range;
+
+        struct {
+            u16     Usage,            Reserved1;
+            u16    StringIndex,      Reserved2;
+            u16    DesignatorIndex,  Reserved3;
+            u16    DataIndex,        Reserved4;
+        } NotRange;
+    };
+} HIDP_VALUE_CAPS;
+typedef struct {
+    u16    Usage;
+    u16    UsagePage;
+    u16    InputReportByteLength;
+    u16    OutputReportByteLength;
+    u16    FeatureReportByteLength;
+    u16    Reserved[17];
+
+    u16    NumberLinkCollectionNodes;
+
+    u16    NumberInputButtonCaps;
+    u16    NumberInputValueCaps;
+    u16    NumberInputDataIndices;
+
+    u16    NumberOutputButtonCaps;
+    u16    NumberOutputValueCaps;
+    u16    NumberOutputDataIndices;
+
+    u16    NumberFeatureButtonCaps;
+    u16    NumberFeatureValueCaps;
+    u16    NumberFeatureDataIndices;
+} HIDP_CAPS;
 
 // Window Messages
 #define WM_INPUT            0x00FF
@@ -283,8 +410,28 @@ typedef struct {
 
 
 // RawInput Macros 
-#define RIDEV_INPUTSINK 0x00000100 
-#define RIDEV_DEVNOTIFY 0x00002000
+#define RIDEV_INPUTSINK         0x00000100 
+#define RIDEV_DEVNOTIFY         0x00002000
+#define RIDI_PREPARSEDDATA      0x20000005
+#define RIDI_DEVICENAME         0x20000007  // the return valus is the character length, not the byte size
+#define RIDI_DEVICEINFO         0x2000000b
+
+#define RID_INPUT 0x10000003
+#define RIM_TYPEMOUSE 0
+#define RIM_TYPEHID 2
+
+#define MOUSE_MOVE_RELATIVE 0
+#define WHEEL_DELTA 120
+#define RI_MOUSE_LEFT_BUTTON_DOWN   0x0001  // Left Button changed to down.
+#define RI_MOUSE_LEFT_BUTTON_UP     0x0002  // Left Button changed to up.
+#define RI_MOUSE_RIGHT_BUTTON_DOWN  0x0004  // Right Button changed to down.
+#define RI_MOUSE_RIGHT_BUTTON_UP    0x0008  // Right Button changed to up.
+#define RI_MOUSE_MIDDLE_BUTTON_DOWN 0x0010  // Middle Button changed to down.
+#define RI_MOUSE_MIDDLE_BUTTON_UP   0x0020  // Middle Button changed to up.
+#define RI_MOUSE_WHEEL              0x0400
+#define HEAP_ZERO_MEMORY            0x00000008 
+
+
 
 // Keys 
 #define LAVI_VK_PAUSE      0x07 
@@ -416,7 +563,17 @@ typedef struct {
     XInputSetState
     UpdateWindow
 
+    GetRawInputDeviceInfoA
+    HidP_GetUsageValue
+    HidP_GetUsage
+    HidP_GetCaps
+    HidP_GetButtonCaps
+    HidP_GetValueCaps
+    HidD_GetManufacturerString
+ 
  */
+
+
 
 /*               DLL       NAME                         RETVAL                      ARGS                                    */
 #define LAVI_WIN32_FUNCS \
@@ -430,7 +587,7 @@ typedef struct {
     LAVI_WINFUNC(user32,   CreateWindowExA,             void *,                     (s32 dwExStyle, const char *lpClassName, const char *lpWindowName, s32 dwStyle, int x, int y, int w, int h, void * hwndParent, void *hMenu, void *hInstance, void *lpParam)) \
     LAVI_WINFUNC(user32,   DefWindowProcA,              size_t,                     (void *hwnd, u32 message, size_t wparam, size_t lparam)) \
     LAVI_WINFUNC(gdi32,    DescribePixelFormat,         int,                        (void *hdc, int iPixelFormat, u32 nBytes, PIXELFORMATDESCRIPTOR *pfd)) \
-    LAVI_WINFUNC(gdi32,    DestroyWindow,               int,                        (void *hwnd)) \
+    LAVI_WINFUNC(user32,   DestroyWindow,               int,                        (void *hwnd)) \
     LAVI_WINFUNC(user32,   DispatchMessageA,            size_t,                     (const MSG *message)) \
     LAVI_WINFUNC(user32,   GetClientRect,               int,                        (void * hwnd, RECT *rect)) \
     LAVI_WINFUNC(kernel32, GetConsoleWindow,            void * ,                    (void)) \
@@ -440,7 +597,15 @@ typedef struct {
     LAVI_WINFUNC(user32,   GetWindowLongPtrA,           s64,                        (void *hwnd, int nIndex)) \
     LAVI_WINFUNC(kernel32, GetProcessHeap,              void *,                     (void)) \
     LAVI_WINFUNC(user32,   GetRawInputData,             u32,                        (void *hRawInput, u32 uiCmd, void *pData, u32 *pcbSize, u32 cbSizeHeader)) \
-    LAVI_WINFUNC(kernel32, HeapAlloc,                   void *,                     (void *hwnd, u64 idEvent, size_t dwBytes)) \
+    LAVI_WINFUNC(user32,   GetRawInputDeviceInfoA,      u32,                        (void *hDevice, u32 uiCmd, void *data, u32 *size)) \
+    LAVI_WINFUNC(user32,   GetRawInputDeviceList,       u32,                        (void *RawinputDeviceList, u32 *NumDevices, u32 cbSize)) \
+     LAVI_WINFUNC(hid,     HidP_GetButtonCaps,          s32,                        (s32 report_type, HIDP_BUTTON_CAPS *button_caps, u16 *button_caps_length, void *ppd)) \
+    LAVI_WINFUNC(hid,      HidP_GetCaps,                s32,                        (void *ppd, HIDP_CAPS *caps)) \
+    LAVI_WINFUNC(hid,      HidD_GetManufacturerString,  u8,                         (void *hHid, void *buffer, u32 buffer_length)) \
+    LAVI_WINFUNC(hid,      HidP_GetUsages,              s32,                        (s32 report_type, u16 usage_page, u16 link_collection, u16 *usage_list, u32 *usage_length, void *ppd, char *report, u32 report_length)) \
+    LAVI_WINFUNC(hid,      HidP_GetUsageValue,          s32,                        (s32 report_type, u16 usage_page, u16 link_collection, u16 usage, u32 *usage_value, void *ppd, char *report, u32 report_length)) \
+    LAVI_WINFUNC(hid,      HidP_GetValueCaps,           s32,                        (s32 report_type, HIDP_VALUE_CAPS *value_caps, u16 *value_caps_length, void *ppd)) \
+    LAVI_WINFUNC(kernel32, HeapAlloc,                   void *,                     (void *hHeap, u64 idEvent, size_t dwBytes)) \
     LAVI_WINFUNC(kernel32, HeapFree,                    int,                        (void *hHeap, s32 dwFlags, void *lpMem)) \
     LAVI_WINFUNC(user32,   KillTimer,                   int,                        (void *hwnd, u64 idEvent)) \
     LAVI_WINFUNC(kernel32, OutputDebugStringA,          void,                       (const char *str)) \
@@ -456,7 +621,7 @@ typedef struct {
     LAVI_WINFUNC(user32,   ShowWindow,                  int,                        (void *hwnd, int nCmdShow)) \
     LAVI_WINFUNC(user32,   Sleep,                       void,                       (u32 milliseconds)) \
     LAVI_WINFUNC(gdi32,    SwapBuffers,                 int,                        (void *hdc)) \
-    LAVI_WINFUNC(kernel32, SwitchToFiber,               void   ,                    (void *lpFiber)) \
+    LAVI_WINFUNC(kernel32, SwitchToFiber,               void,                       (void *lpFiber)) \
     LAVI_WINFUNC(user32,   TranslateMessage,            size_t,                     (MSG *message)) \
     LAVI_WINFUNC(user32,   UpdateWindow,                int,                        (void *hwnd)) 
 
@@ -507,13 +672,53 @@ typedef struct {
                        back;
 } lavi_gamepad;
 
+typedef struct {
+    // why do we need to pack this? 
+    void *ppd;
+    HIDP_BUTTON_CAPS *b_caps;
+    HIDP_VALUE_CAPS  *v_vaps;
+    HIDP_CAPS caps;
+    u32 ppd_count;
+    u16 b_caps_count;
+    u16 v_caps_count;
+} _hid;
+
+typedef struct {
+    struct {
+        boolean connected;
+        // Struct for user to interface gamepad with 
+        lavi_digitalbutton dpad_up,
+                           dpad_down,
+                           dpad_left,
+                           dpad_right;
+        lavi_stick lstick,
+                   rstick;
+    } gamepad;
+
+    // Open hid for the user to interface more than just the gamepad
+} lavi_hid;
+
+enum {
+    HID_GAMEPAD_N64,
+};
+
+static void
+lavi_hid_set_gamepad_profile(lavi_hid *hid, s32 gamepad_profile_id)
+{
+    switch (gamepad_profile_id) {
+    case HID_GAMEPAD_N64:
+        // call function ...
+        // Map buttons and so on.
+        break;
+    }
+}
+
 enum {
     LAVI_MAX_KEYS = 256, 
+    LAVI_MAX_USAGE_KEYS = 128,
 };
 
 typedef struct {
-    // Properties of a mouse is that it has two buttons, left and right, and a wheel in which 
-    // has a spin feature to it. Capture the wheel's pos and movement.  
     lavi_digitalbutton lbutton,
                        rbutton;
     int wheel;
@@ -521,7 +726,6 @@ typedef struct {
     point pos;
     point dt_pos;
 } lavi_mouse;
-
 
 typedef struct lavi_api lavi_api;
 struct lavi_api {
@@ -563,11 +767,8 @@ struct lavi_api {
 
     lavi_digitalbutton keys[LAVI_MAX_KEYS];
     lavi_gamepad gamepad;
+    lavi_hid hid;
     lavi_mouse   mouse; 
-
-    struct {
-        boolean attached;
-    } console;
 
     struct {
         void *hwnd;
@@ -581,7 +782,6 @@ struct lavi_api {
 
 // Globals
 static lavi_api *g_api;
-
 extern __declspec(dllimport) lavi_wproc __stdcall GetProcAddress(void *mod, const char *func_name);
 extern __declspec(dllimport) void *     __stdcall LoadLibraryA(const char *name);
 
@@ -589,6 +789,10 @@ extern __declspec(dllimport) void *     __stdcall LoadLibraryA(const char *name)
 static void
 lavi_console_attach(void)
 {
+    // NOTE to reader: 
+    // printf to the console via MSVC does not work, we work around that   
+    // by attaching THIS process to the console, in my case CMD.
+
     lavi_AttachConsole((u32)-1);
 
     if (lavi_GetConsoleWindow() != NULL) {
@@ -643,6 +847,7 @@ lavi_load_dlls(void)
     void *kernel32  = LoadLibraryA("kernel32.dll");
     void *ole32     = LoadLibraryA("ole32.dll");
     void *user32    = LoadLibraryA("user32.dll");
+    void *hid       = LoadLibraryA("hid.dll");
     void *winmm     = LoadLibraryA("winmm.dll");
     void *xinput    = LoadLibraryA("xinput9_1_0.dll");
     if (xinput == NULL)
@@ -713,14 +918,14 @@ lavi_pull_keyboard(void)
         return;
     }
 
-    for (i = 0; i < 256; i++) {
+    for (i = 0; i < LAVI_MAX_KEYS; i++) {
         u8 key = keyboard_state[i];
         lavi_update_digitalbutton(g_api->keys + i, keyboard_state[i] >> 7);
     }
 }
 
 static void
-lavi_pull_gamepad(void)
+lavi_pull_xinput_gamepad(void)
 {
     XINPUT_STATE xinput_state = {0};
 
@@ -755,6 +960,12 @@ lavi_pull_gamepad(void)
     lavi_update_stick(&g_api->gamepad.lthumb_stick, CONVERT(xinput_state.Gamepad.sThumbLX), CONVERT(xinput_state.Gamepad.sThumbLY));
     lavi_update_stick(&g_api->gamepad.rthumb_stick, CONVERT(xinput_state.Gamepad.sThumbRX), CONVERT(xinput_state.Gamepad.sThumbRY));
 #undef CONVERT
+
+}
+
+static void
+lavi_pull_hid_gamepad(lavi_api *api)
+{
 
 }
 
@@ -796,7 +1007,7 @@ lavi_pull(void)
     lavi_pull_window();
     lavi_pull_time();  
     lavi_pull_keyboard();
-    lavi_pull_gamepad();
+    lavi_pull_xinput_gamepad();
 }
 
 // Push
@@ -814,13 +1025,90 @@ lavi_push(void)
 }
 
 // Update 
+static void
+lavi_update_rawinput(RAWINPUT *ri)
+{
+    // TODO: Parse PPD, Button Caps, Value Caps  
+    void *ppd = NULL;
+    HIDP_CAPS caps = {0};
+    HIDP_BUTTON_CAPS *b_caps = NULL;
+    HIDP_VALUE_CAPS  *v_caps = NULL; 
+    u32 ppd_count;
+    u16 b_caps_count, v_caps_count;
+    void *hheap = lavi_GetProcessHeap();
+    u32 button_count = 0;
+    
+    if (lavi_GetRawInputDeviceInfoA(ri->header.hDevice, RIDI_PREPARSEDDATA, NULL, &ppd_count) == (u32)-1) {
+        goto cleanup;
+    }
+    ppd = (void *)lavi_HeapAlloc(lavi_GetProcessHeap(), HEAP_ZERO_MEMORY, ppd_count);
+    if (!ppd) {
+        goto cleanup;
+    }
+
+    if (lavi_GetRawInputDeviceInfoA(ri->header.hDevice, RIDI_PREPARSEDDATA, ppd, &ppd_count) == 0) {
+        goto cleanup;
+    }
+
+    lavi_HidP_GetCaps(ppd, &caps);
+    
+    b_caps_count = caps.NumberInputButtonCaps;
+    b_caps = (HIDP_BUTTON_CAPS *)lavi_HeapAlloc(hheap, HEAP_ZERO_MEMORY, b_caps_count * sizeof(HIDP_BUTTON_CAPS));
+    if (!b_caps)
+        goto cleanup;
+    
+    lavi_HidP_GetButtonCaps(0, b_caps, &b_caps_count, ppd);
+    
+    button_count = b_caps->Range.UsageMax - b_caps->Range.UsageMin + 1; 
+    //printf("button_count: %d\n", button_count);
+
+
+    v_caps_count = caps.NumberInputValueCaps;
+    v_caps = (HIDP_VALUE_CAPS *)lavi_HeapAlloc(hheap, HEAP_ZERO_MEMORY, v_caps_count * sizeof(HIDP_VALUE_CAPS));
+    if (!v_caps)
+        goto cleanup;
+    
+    lavi_HidP_GetValueCaps(0, v_caps, &v_caps_count, ppd);
+    
+    {
+        u16 i;
+        for (i = 0; i < b_caps_count; i++) {
+            u32 value;
+            lavi_HidP_GetUsageValue(0, v_caps[i].UsagePage, 0, v_caps[i].Range.UsageMin, &value, ppd, (char *)ri->data.hid.bRawData, ri->data.hid.dwSizeHid);
+            //printf("%d:%d \n", i, value);
+        }
+    }
+
+
+#if 0
+    {
+        boolean is_down;
+        u32 i;
+        u16 usage_list[LAVI_MAX_USAGE_KEYS];
+        u32 usage_length = 0;
+        (lavi_HidP_GetUsages(0, b_caps->UsagePage, 0, usage_list, &usage_length, ppd, (char *)ri->data.hid.bRawData, ri->data.hid.dwSizeHid));
+        
+        //printf("usage_length: %d\n", usage_length);   
+        for (i = 0; i < button_count; i++) {
+            printf("ulist: %d\n", usage_list[i]);
+        }
+    } 
+#endif 
+
+cleanup:
+    if (ppd) lavi_HeapFree(hheap, 0, ppd);
+    if (b_caps) lavi_HeapFree(hheap, 0, b_caps);
+    if (v_caps) lavi_HeapFree(hheap, 0, v_caps);
+
+}
+
+
 void 
 lavi_update(void)
 {
     lavi_pull();
     lavi_push();
 }
-
 
 static void __stdcall 
 lavi_message_fiber_proc(void)
@@ -835,19 +1123,6 @@ lavi_message_fiber_proc(void)
         lavi_SwitchToFiber(g_api->win32.main_fiber);
     }
 }
-
-#define RID_INPUT 0x10000003
-#define RIM_TYPEMOUSE 0 
-#define MOUSE_MOVE_RELATIVE 0
-#define WHEEL_DELTA 120
-#define RI_MOUSE_LEFT_BUTTON_DOWN   0x0001  // Left Button changed to down.
-#define RI_MOUSE_LEFT_BUTTON_UP     0x0002  // Left Button changed to up.
-#define RI_MOUSE_RIGHT_BUTTON_DOWN  0x0004  // Right Button changed to down.
-#define RI_MOUSE_RIGHT_BUTTON_UP    0x0008  // Right Button changed to up.
-#define RI_MOUSE_MIDDLE_BUTTON_DOWN 0x0010  // Middle Button changed to down.
-#define RI_MOUSE_MIDDLE_BUTTON_UP   0x0020  // Middle Button changed to up.
-#define RI_MOUSE_WHEEL              0x0400
-#define HEAP_MEMORY_ZERO            0x00000008 
 
 static size_t __stdcall 
 lavi_main_proc(void * hwnd,
@@ -868,7 +1143,7 @@ lavi_main_proc(void * hwnd,
             goto cleanup;
         }
 
-        ri = (RAWINPUT *)lavi_HeapAlloc(hheap, HEAP_MEMORY_ZERO, ri_size);
+        ri = (RAWINPUT *)lavi_HeapAlloc(hheap, HEAP_ZERO_MEMORY, ri_size);
         if (!ri)
             goto cleanup;
         
@@ -902,6 +1177,8 @@ lavi_main_proc(void * hwnd,
             if (button_flags & RI_MOUSE_WHEEL) 
                 api->mouse.dt_wheel += ((s16)ri->data.mouse.u_param.s_param.usButtonData) / WHEEL_DELTA;
         }
+
+        lavi_update_rawinput(ri);
 
 cleanup:
         if (ri) 
@@ -944,7 +1221,7 @@ lavi_init_window(void)
     int win_width;
     int win_height;
     
-    wc.lpfnWndProc = lavi_main_proc;
+    wc.lpfnWndProc = (lavi_WNDPROC)lavi_main_proc;
     wc.lpszClassName = "Lavi";
     wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
     
@@ -1077,7 +1354,7 @@ lavi_init_opengl(void)
 
     {
         lavi_wglCreateContext = (void *(__stdcall *)(void *))opengl_get_func("wglCreateContext");
-        lavi_wglDeleteCurrent   = (int   (__stdcall *)(void *))opengl_get_func("wglDeleteCurrent");
+        lavi_wglDeleteCurrent = (int   (__stdcall *)(void *))opengl_get_func("wglDeleteCurrent");
         lavi_wglMakeCurrent = (int   (__stdcall *)(void *, void *))opengl_get_func("wglMakeCurrent");
        
 
@@ -1089,13 +1366,15 @@ lavi_init_opengl(void)
 
 
 static void
-lavi_init_rawinput(void)
+lavi_register_rawinput(void)
 {
     u32 i;
     u16 dev_usage[] = {
         0x02,   // HID mouse 
-        0x06    // HID keyboard
-        // TODO: Gamepad support
+        0x06,   // HID keyboard
+        0x04,   
+        0x05,
+        0x08,
     };
 
     RAWINPUTDEVICE rid[ARRAY_SIZE(dev_usage)];
@@ -1112,11 +1391,84 @@ lavi_init_rawinput(void)
         return;
     }   
 
-    lavi_printf("Succesfully registered rawinput devs\n");
+    printf("Succesfully registered rawinput devs\n");
+}
+
+
+static void 
+lavi_rawinput_getinfo(void *hdevice)
+{
+    RID_DEVICE_INFO *rdi = NULL;
+    u32 rdi_cnt = 0;
+    void *hheap = lavi_GetProcessHeap();
+    if (lavi_GetRawInputDeviceInfoA(hdevice, RIDI_DEVICEINFO, NULL, &rdi_cnt) == (u32)-1) {
+        goto cleanup;
+    }
+
+    rdi = (RID_DEVICE_INFO *)lavi_HeapAlloc(hheap, HEAP_ZERO_MEMORY, rdi_cnt);
+    if (rdi == NULL) {
+        goto cleanup;
+    }
+
+    if (lavi_GetRawInputDeviceInfoA(hdevice, RIDI_DEVICEINFO, rdi, &rdi_cnt) == 0) {
+        goto cleanup;
+    }
+    
+    char buffer[256];
+    lavi_HidD_GetManufacturerString(hdevice, buffer, sizeof(buffer));
+
+    printf("Manufacturer: %s\n", buffer);
+    printf("VID: %d\n", rdi->param.hid.dwVendorId);
+    printf("PID: %d\n", rdi->param.hid.dwProductId);
+
+cleanup:
+    if (rdi) lavi_HeapFree(hheap, 0, rdi);
 }
 
 static void
-lavi_init_gamepad(void)
+lavi_enumerate_rawinput(void)
+{
+    RAWINPUTDEVICELIST *rid_list = NULL;
+    u32 i, count = 0;
+    void *hheap = lavi_GetProcessHeap();
+
+    if (lavi_GetRawInputDeviceList(NULL, &count, sizeof(RAWINPUTDEVICELIST)) == (u32)-1) {
+        goto cleanup;
+    }
+
+    rid_list = (RAWINPUTDEVICELIST *)lavi_HeapAlloc(hheap, HEAP_ZERO_MEMORY, count * sizeof(RAWINPUTDEVICELIST));
+    if (!rid_list)
+        goto cleanup;
+
+    if (lavi_GetRawInputDeviceList(rid_list, &count, sizeof(RAWINPUTDEVICELIST)) == 0) {
+        goto cleanup;
+    }
+
+    for (i = 0; i < count; i++) {
+        if (rid_list->dwType == RIM_TYPEHID) {
+            lavi_rawinput_getinfo(rid_list[i].hDevice);
+            //printf("HID!\n");
+        }
+    }
+
+
+
+cleanup:
+    if (rid_list) 
+        lavi_HeapFree(hheap, 0, rid_list);
+}
+
+
+static void
+lavi_init_rawinput(void)
+{
+    lavi_register_rawinput();
+    lavi_enumerate_rawinput();
+}
+
+
+static void
+lavi_init_xinput(void)
 {
     void *xinput_mod;
     float trigger_threshold;
@@ -1132,6 +1484,16 @@ lavi_init_gamepad(void)
     g_api->gamepad.rthumb_stick.threshold = XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE / 32767.0f;
 }
 
+
+static void
+lavi_init_hid(void)
+{
+    // Register HID 
+    // Parse HID 
+    
+
+}
+
 void 
 lavi_init(struct lavi_api *api)
 {
@@ -1139,16 +1501,15 @@ lavi_init(struct lavi_api *api)
 
     lavi_init_window();
     lavi_init_time();
-    lavi_init_gamepad();
+    lavi_init_xinput();
     lavi_init_opengl();
     lavi_init_rawinput();
+
+
 
     api->initialized = LAVI_TRUE;
     lavi_pull();
 }
-
-
-extern void lavi_main(int argc, char **argv);
 
 int __stdcall
 WinMain(void *instance,

@@ -1,2 +1,2 @@
 @echo off
-cl demo.c /Fedemo.exe /link /incremental:no /subsystem:windows
+cl /Zi demo.c /Fedemo.exe /link /PDB:demo.pdb /incremental:no /subsystem:windows opengl32.lib 
