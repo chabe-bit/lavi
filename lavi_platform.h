@@ -65,8 +65,8 @@ extern void lavi_update(void);
 extern void lavi_printf(const char *fmt, ...);
 extern void lavi_msgbox(const char *fmt, ...);
 extern void lavi_fatal(const char *fmt, ...);
-extern point LAVI_POINT (int   x, int   y) { point p = {x,y}; return p; }
-extern point LAVI_POINTF(float x, float y) { point p = {x,y}; return p; }
+extern point LAVI_POINT (int   x, int   y) { point  p = {x,y}; return p; }
+extern point LAVI_POINTF(float x, float y) { pointf p = {x,y}; return p; }
 
 //////////////////////
 
@@ -1527,7 +1527,7 @@ WinMain(void *instance,
     int argc = 0;
     char *argv[256] = {0};
 
-
+    // TODO: Not handling argc or argv 
     
     lavi_main(argc, argv);
     return 0;
