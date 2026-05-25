@@ -15,7 +15,7 @@ Supports:
 * OpenGL 1.0 
 * Time (delta_time, ticks)
 
-All you need to start is include the header file and call two functions, lavi_init and lavi_update, nothing more. If you're interested in adding more, instructions are at the bottom.
+All you need to start is include the header file and call two functions, lavi_init and lavi_update, nothing more.
 ```c
 #include "lavi_platform.h"
 
@@ -51,7 +51,7 @@ void lavi_api(int argc, char **argv)
 
 ```
 
-If you're interested in linking in your own functions from Win32 API:
+Linking in your own functions from Win32 API:
 
 ```c
     // Don't be afraid of what you see here, we're working with a C idiom called xmacros for code generation, simply for ease. 
