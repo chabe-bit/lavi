@@ -21,7 +21,8 @@ All you need to start is include the header file and call two functions, lavi_in
 
 static lavi_api g_api;
 
-void lavi_api(int argc, char **argv)
+// lavi_main is a custom entry point, you do not have to use 
+void lavi_main(int argc, char **argv)
 {
     // Optional: Define window yourself, otherwise will be set to default values  
     g_api.windows.size = LAVI_POINT(1280, 720);
