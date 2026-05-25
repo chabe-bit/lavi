@@ -15,7 +15,7 @@ Supports:
 * OpenGL 1.0 
 * Time (delta_time, ticks)
 
-All you need to start is include the header file and call two functions, lavi_init and lavi_update.
+All you need to start is to include the header file and call two functions, lavi_init and lavi_update.
 ```c
 #include "lavi_platform.h"
 
