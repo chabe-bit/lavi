@@ -70,6 +70,7 @@ Linking in your own functions from Win32 API:
     [in]  PHIDP_PREPARSED_DATA PreparsedData,
     [out] PHIDP_CAPS           Capabilities
     );
+
     // Important to reverse engineer here. Structs such as the two fields in the argument, I would take them from the header file and place them in. 
     typedef struct {
         // Change the original types to their direct types ie USAGE into u16 
@@ -94,8 +95,9 @@ Linking in your own functions from Win32 API:
         u16    NumberFeatureValueCaps;
         u16    NumberFeatureDataIndices;
     } HIDP_CAPS;
-    // Types on the other hand, I woudln't define them, but rather inspect what type they truly are and define them as that directly instead.
-    // So as you can see NTSTATUS we're unsure, through some inspection we can see its type is a LONG, we can see then its a signed 32-bit integer, so we cast an int.
+
+    // Types on the other hand, I woudln't define them documented as they arr, but rather inspect what type they truly are and define them as that directly instead.
+    // So as you can see NTSTATUS we're unsure of its type, but through some inspection we can see its a LONG, a signed 32-bit integer, thus we cast an int or long.
     NTSTATUS HidP_GetCaps(...);
 
     // Provide it like this, prereq understanding of C macro syntax is important. 
@@ -105,7 +107,7 @@ Linking in your own functions from Win32 API:
     // Here's how you call it:
     lavi_Hid_GetCaps(...);
 
-    NOTE: if you are curious, yes you can debug/step through through this API 
+    NOTE: if you are curious, yes you can debug/step through this API and linked in functions 
 
     
 ```
