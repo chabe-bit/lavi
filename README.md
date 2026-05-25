@@ -4,7 +4,7 @@ lavi is a minimal API that abstracts a tight Win32 platform layer, designed for 
 
 Windows.h is not used, functions are dynamically linked rather than statically, meaning every Win32 function in this API has been pulled out of a given DLL ourselves. 
 
-The main motivation behind this is Windows.h contains a large mountain of code that is hardly ever used, of course this depends on the complexity of the application but regardless of it, reducing such overhead has an immense return in reduced compile time.
+The main motivation behind this is Windows.h contains a large mountain of code that is hardly ever used, of course this depends on the complexity of the application if one is using much of it but regardless, reducing such overhead has an immense return in reduced compile time.
 
 So, in the case of a platform layer for developing games, I've collected a minimal set of functions for quick and easy prototyping.
 
