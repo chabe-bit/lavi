@@ -59,6 +59,8 @@ void lavi_main(int argc, char **argv)
     while (!api.quit) {
         lavi_update();
    
+        printf("ms_per_frame: %.2f\n", api.timestep.ms_per_frame);
+        
         if (api.keys[LAVI_VK_ALT].is_pressed) {
             printf("PRESSED\n");
         }

@@ -65,8 +65,8 @@ extern void lavi_update(void);
 extern void lavi_printf(const char *fmt, ...);
 extern void lavi_msgbox(const char *fmt, ...);
 extern void lavi_fatal(const char *fmt, ...);
-extern point  LAVI_POINT (int   x, int   y) { point  p = {x,y}; return p; }
-extern pointf LAVI_POINTF(float x, float y) { pointf p = {x,y}; return p; }
+extern point LAVI_POINT (int   x, int   y) { point  p = {x,y}; return p; }
+extern point LAVI_POINTF(float x, float y) { pointf p = {x,y}; return p; }
 
 //////////////////////
 
@@ -619,10 +619,9 @@ typedef struct {
     LAVI_WINFUNC(user32,   SetTimer,                    u64,                        (void *hwnd, u64 nIDEvent, u32 uElapse, lavi_wproc *lpTimerFunc)) \
     LAVI_WINFUNC(user32,   SetWindowLongPtrA,           s64,                        (void *hwnd, int nIndex, s64 dwNewLong)) \
     LAVI_WINFUNC(user32,   ShowWindow,                  int,                        (void *hwnd, int nCmdShow)) \
-    LAVI_WINFUNC(kernel32, Sleep,                       void,                       (u32 milliseconds)) \
+    LAVI_WINFUNC(user32,   Sleep,                       void,                       (u32 milliseconds)) \
     LAVI_WINFUNC(gdi32,    SwapBuffers,                 int,                        (void *hdc)) \
     LAVI_WINFUNC(kernel32, SwitchToFiber,               void,                       (void *lpFiber)) \
-    LAVI_WINFUNC(winmm,    timeBeginPeriod,             u32,                        (u32 uperiod)) \
     LAVI_WINFUNC(user32,   TranslateMessage,            size_t,                     (MSG *message)) \
     LAVI_WINFUNC(user32,   UpdateWindow,                int,                        (void *hwnd)) 
 
@@ -766,18 +765,6 @@ struct lavi_api {
         u64     ticks_per_sec;  // raw
     } time;
 
-    struct {
-        LARGE_INTEGER freq, 
-                      start, 
-                      end; 
-        u64 counter_freq;
-        float elapsed, 
-              target_elasped,
-              ms_per_frame;
-        boolean is_granular;
-
-    } timestep;
-
     lavi_digitalbutton keys[LAVI_MAX_KEYS];
     lavi_gamepad gamepad;
     lavi_hid hid;
@@ -850,133 +837,6 @@ lavi_fatal(const char *fmt, ...)
     lavi_msgbox(fmt);
     exit(1);
 }
-
-static LARGE_INTEGER 
-get_wallclock(void)
-{
-    LARGE_INTEGER wc;
-    lavi_QueryPerformanceCounter(&wc);
-    return wc;
-}
-
-
-static float
-get_seconds_elapsed(LARGE_INTEGER start, LARGE_INTEGER end)
-{
-    float sec = ((float)(end.QuadPart - start.QuadPart) / 
-                (float)g_api->timestep.counter_freq);
-    return sec;
-}
-
-
-static void
-register_rawinput(void)
-{
-    u32 i;
-    u16 dev_usage[] = {
-        0x02,   // HID mouse 
-        0x06,   // HID keyboard
-        0x04,   
-        0x05,
-        0x08,
-    };
-
-    RAWINPUTDEVICE rid[ARRAY_SIZE(dev_usage)];
-    for (i = 0; i < ARRAY_SIZE(dev_usage); i++) {
-        rid[i].usUsagePage = HID_USAGE_GENERIC_PAGE;
-        rid[i].usUsage = dev_usage[i];
-        
-        // NOTE: DO NOT USE RIDEV_NOLEGACY, IT WILL HANG!!!!!!!!!!!!
-        rid[i].dwFlags = RIDEV_INPUTSINK | RIDEV_DEVNOTIFY;
-        rid[i].hwndTarget = g_api->win32.hwnd;
-    }
-
-    if (!lavi_RegisterRawInputDevices(rid, ARRAY_SIZE(rid), sizeof(rid[0]))) {
-        return;
-    }   
-
-    printf("Succesfully registered rawinput devs\n");
-}
-
-
-static void 
-getinfo_rawinput(void *hdevice)
-{
-    RID_DEVICE_INFO *rdi = NULL;
-    u32 rdi_cnt = 0;
-    void *hheap = lavi_GetProcessHeap();
-    if (lavi_GetRawInputDeviceInfoA(hdevice, RIDI_DEVICEINFO, NULL, &rdi_cnt) == (u32)-1) {
-        goto cleanup;
-    }
-
-    rdi = (RID_DEVICE_INFO *)lavi_HeapAlloc(hheap, HEAP_ZERO_MEMORY, rdi_cnt);
-    if (rdi == NULL) {
-        goto cleanup;
-    }
-
-    if (lavi_GetRawInputDeviceInfoA(hdevice, RIDI_DEVICEINFO, rdi, &rdi_cnt) == 0) {
-        goto cleanup;
-    }
-    
-    char buffer[256];
-    lavi_HidD_GetManufacturerString(hdevice, buffer, sizeof(buffer));
-
-    printf("Manufacturer: %s\n", buffer);
-    printf("VID: %d\n", rdi->param.hid.dwVendorId);
-    printf("PID: %d\n", rdi->param.hid.dwProductId);
-
-cleanup:
-    if (rdi) lavi_HeapFree(hheap, 0, rdi);
-}
-
-static void
-enumerate_rawinput(void)
-{
-    RAWINPUTDEVICELIST *rid_list = NULL;
-    u32 i, count = 0;
-    void *hheap = lavi_GetProcessHeap();
-
-    if (lavi_GetRawInputDeviceList(NULL, &count, sizeof(RAWINPUTDEVICELIST)) == (u32)-1) {
-        goto cleanup;
-    }
-
-    rid_list = (RAWINPUTDEVICELIST *)lavi_HeapAlloc(hheap, HEAP_ZERO_MEMORY, count * sizeof(RAWINPUTDEVICELIST));
-    if (!rid_list)
-        goto cleanup;
-
-    if (lavi_GetRawInputDeviceList(rid_list, &count, sizeof(RAWINPUTDEVICELIST)) == 0) {
-        goto cleanup;
-    }
-
-    for (i = 0; i < count; i++) {
-        if (rid_list->dwType == RIM_TYPEHID) {
-            getinfo_rawinput(rid_list[i].hDevice);
-            //printf("HID!\n");
-        }
-    }
-
-
-
-cleanup:
-    if (rid_list) 
-        lavi_HeapFree(hheap, 0, rid_list);
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 //////////////
 static void 
@@ -1110,7 +970,7 @@ lavi_pull_hid_gamepad(lavi_api *api)
 }
 
 static void
-lavi_pull_tick(void)
+lavi_pull_time(void)
 {
     LARGE_INTEGER counter, freq;
     u64 curr_ticks;
@@ -1133,13 +993,6 @@ lavi_pull_tick(void)
     g_api->time.time_sec = (double)g_api->time.time_ticks / (double)g_api->time.ticks_per_sec; 
 }
 
-static void
-lavi_pull_fixed_timestep(void)
-{
-    // This is the pull that needs to take precedence over everything in the loop so we can measure what happens from the start to end of a frame. 
-    g_api->timestep.end = get_wallclock();
-    g_api->timestep.elapsed = get_seconds_elapsed(g_api->timestep.start, g_api->timestep.end);
-}
 
 static void 
 lavi_pull(void)
@@ -1150,39 +1003,14 @@ lavi_pull(void)
     }
 
     lavi_SwitchToFiber(g_api->win32.message_fiber);
-    
-    lavi_pull_fixed_timestep();
+
     lavi_pull_window();
-    lavi_pull_tick();  
+    lavi_pull_time();  
     lavi_pull_keyboard();
     lavi_pull_xinput_gamepad();
 }
 
 // Push
-static void
-lavi_push_fixed_timestep(void)
-{
-    // This function needs to take place at the end to measure the 
-    // start to end time each frame
-
-    if (g_api->timestep.elapsed < g_api->timestep.target_elasped) {
-        if (g_api->timestep.is_granular) {
-            u32 ms = (u32)(1000.0f * (g_api->timestep.target_elasped - g_api->timestep.elapsed));
-            if (ms > 0) {
-                lavi_Sleep(ms);
-            }
-        }
-
-        while (g_api->timestep.elapsed < g_api->timestep.target_elasped) {
-            g_api->timestep.elapsed = get_seconds_elapsed(g_api->timestep.start, get_wallclock());
-        }
-    }
-
-    g_api->timestep.end = get_wallclock();
-    g_api->timestep.ms_per_frame = 1000.0f * get_seconds_elapsed(g_api->timestep.start, g_api->timestep.end);
-    g_api->timestep.start = g_api->timestep.end;
-}
-    
 static void
 lavi_push_opengl(void)
 {
@@ -1194,7 +1022,6 @@ static void
 lavi_push(void)
 {
     lavi_push_opengl();
-    lavi_push_fixed_timestep();
 }
 
 // Update 
@@ -1298,7 +1125,7 @@ lavi_message_fiber_proc(void)
 }
 
 static size_t __stdcall 
-lavi_main_proc(void *hwnd,
+lavi_main_proc(void * hwnd,
                u32 message,
                size_t wparam,
                size_t lparam)
@@ -1461,7 +1288,7 @@ lavi_init_window(void)
 }
 
 static boolean 
-lavi_init_tick(void)
+lavi_init_time(void)
 {
     LARGE_INTEGER freq, counter;
     lavi_QueryPerformanceFrequency(&freq);
@@ -1471,19 +1298,6 @@ lavi_init_tick(void)
     g_api->time.initial_ticks = counter.QuadPart; 
     
     return LAVI_TRUE;
-}
-
-static void 
-lavi_init_fixed_timestep(void)
-{
-    lavi_QueryPerformanceFrequency(&g_api->timestep.freq);
-    g_api->timestep.counter_freq = g_api->timestep.freq.QuadPart;
-    g_api->timestep.target_elasped = 1.0f / 60.0f;
-
-    // TODO: add 
-    g_api->timestep.is_granular = (lavi_timeBeginPeriod(1) == 0 /*TIMERR_NOERROR*/);
-    g_api->timestep.start = get_wallclock();
-    
 }
 
 static lavi_wproc   (__stdcall *lavi_wglGetProcAddress)(const char *name);
@@ -1550,11 +1364,106 @@ lavi_init_opengl(void)
     return LAVI_TRUE;
 }
 
+
+static void
+lavi_register_rawinput(void)
+{
+    u32 i;
+    u16 dev_usage[] = {
+        0x02,   // HID mouse 
+        0x06,   // HID keyboard
+        0x04,   
+        0x05,
+        0x08,
+    };
+
+    RAWINPUTDEVICE rid[ARRAY_SIZE(dev_usage)];
+    for (i = 0; i < ARRAY_SIZE(dev_usage); i++) {
+        rid[i].usUsagePage = HID_USAGE_GENERIC_PAGE;
+        rid[i].usUsage = dev_usage[i];
+        
+        // NOTE: DO NOT USE RIDEV_NOLEGACY, IT WILL HANG!!!!!!!!!!!!
+        rid[i].dwFlags = RIDEV_INPUTSINK | RIDEV_DEVNOTIFY;
+        rid[i].hwndTarget = g_api->win32.hwnd;
+    }
+
+    if (!lavi_RegisterRawInputDevices(rid, ARRAY_SIZE(rid), sizeof(rid[0]))) {
+        return;
+    }   
+
+    printf("Succesfully registered rawinput devs\n");
+}
+
+
+static void 
+lavi_rawinput_getinfo(void *hdevice)
+{
+    RID_DEVICE_INFO *rdi = NULL;
+    u32 rdi_cnt = 0;
+    void *hheap = lavi_GetProcessHeap();
+    if (lavi_GetRawInputDeviceInfoA(hdevice, RIDI_DEVICEINFO, NULL, &rdi_cnt) == (u32)-1) {
+        goto cleanup;
+    }
+
+    rdi = (RID_DEVICE_INFO *)lavi_HeapAlloc(hheap, HEAP_ZERO_MEMORY, rdi_cnt);
+    if (rdi == NULL) {
+        goto cleanup;
+    }
+
+    if (lavi_GetRawInputDeviceInfoA(hdevice, RIDI_DEVICEINFO, rdi, &rdi_cnt) == 0) {
+        goto cleanup;
+    }
+    
+    char buffer[256];
+    lavi_HidD_GetManufacturerString(hdevice, buffer, sizeof(buffer));
+
+    printf("Manufacturer: %s\n", buffer);
+    printf("VID: %d\n", rdi->param.hid.dwVendorId);
+    printf("PID: %d\n", rdi->param.hid.dwProductId);
+
+cleanup:
+    if (rdi) lavi_HeapFree(hheap, 0, rdi);
+}
+
+static void
+lavi_enumerate_rawinput(void)
+{
+    RAWINPUTDEVICELIST *rid_list = NULL;
+    u32 i, count = 0;
+    void *hheap = lavi_GetProcessHeap();
+
+    if (lavi_GetRawInputDeviceList(NULL, &count, sizeof(RAWINPUTDEVICELIST)) == (u32)-1) {
+        goto cleanup;
+    }
+
+    rid_list = (RAWINPUTDEVICELIST *)lavi_HeapAlloc(hheap, HEAP_ZERO_MEMORY, count * sizeof(RAWINPUTDEVICELIST));
+    if (!rid_list)
+        goto cleanup;
+
+    if (lavi_GetRawInputDeviceList(rid_list, &count, sizeof(RAWINPUTDEVICELIST)) == 0) {
+        goto cleanup;
+    }
+
+    for (i = 0; i < count; i++) {
+        if (rid_list->dwType == RIM_TYPEHID) {
+            lavi_rawinput_getinfo(rid_list[i].hDevice);
+            //printf("HID!\n");
+        }
+    }
+
+
+
+cleanup:
+    if (rid_list) 
+        lavi_HeapFree(hheap, 0, rid_list);
+}
+
+
 static void
 lavi_init_rawinput(void)
 {
-    register_rawinput();
-    enumerate_rawinput();
+    lavi_register_rawinput();
+    lavi_enumerate_rawinput();
 }
 
 
@@ -1591,11 +1500,10 @@ lavi_init(struct lavi_api *api)
     g_api = api;
 
     lavi_init_window();
-    lavi_init_tick();
-    lavi_init_fixed_timestep();
+    lavi_init_time();
     lavi_init_xinput();
     lavi_init_opengl();
-    //lavi_init_rawinput();
+    lavi_init_rawinput();
 
 
 
