@@ -12,7 +12,9 @@
 // which we can easily define ourselves 
 #define WINGDIAPI __declspec(dllimport)
 #define APIENTRY  __stdcall
+#define CALLBACK  __stdcall
 #include <gl/GL.h>
+#include <gl/GLU.h>
 //////////////////////////////
 
 
@@ -518,6 +520,12 @@ typedef struct {
 #define LAVI_VK_NUM_SUBTRACT   0x7e
 #define LAVI_VK_NUM_DECIMAL    0x7f
 
+#if 0
+#define LAVI_KEY_W 0x58
+#define LAVI_KEY_A 0x41
+#define LAVI_KEY_S 0x53
+#define LAVI_KEY_D 0x44
+#endif 
 
 
 // Generate functions that I want  
@@ -961,20 +969,6 @@ cleanup:
     if (rid_list) 
         lavi_HeapFree(hheap, 0, rid_list);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1596,8 +1590,6 @@ lavi_init(struct lavi_api *api)
     lavi_init_xinput();
     lavi_init_opengl();
     //lavi_init_rawinput();
-
-
 
     api->initialized = LAVI_TRUE;
     lavi_pull();
