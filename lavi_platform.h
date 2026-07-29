@@ -23,31 +23,30 @@
 #define ASSERT(x) \
     if (!(x)) { lavi_MessageBoxA(0, #x, "Assertion Failure", MB_OK); __debugbreak();  }
 
-
-#if __STDC_VERSION__ >= 199901L
+#if defined(__cplusplus) || (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L)
 #include <stdint.h>	
-typedef uint8_t					u8;
-typedef uint16_t				u16;
-typedef uint32_t 				u32;
-typedef uint64_t				u64;
+typedef uint8_t					lavi_u8;
+typedef uint16_t				lavi_u16;
+typedef uint32_t 				lavi_u32;
+typedef uint64_t				lavi_u64;
 
-typedef uint8_t 				s8;
-typedef uint16_t				s16;
-typedef uint32_t				s32;
-typedef uint64_t				s64;
+typedef uint8_t 				lavi_s8;
+typedef uint16_t				lavi_s16;
+typedef uint32_t				lavi_s32;
+typedef uint64_t				lavi_s64;
 #else 
-typedef unsigned char			u8;
-typedef unsigned short			u16;
-typedef unsigned int			u32;
-typedef unsigned long long int	u64;
+typedef unsigned char			lavi_u8;
+typedef unsigned short			lavi_u16;
+typedef unsigned int			lavi_u32;
+typedef unsigned long long int	lavi_u64;
 
-typedef signed char				s8;
-typedef signed short			s16;
-typedef signed int				s32;
-typedef signed long long int	s64;
+typedef signed char				lavi_s8;
+typedef signed short			lavi_s16;
+typedef signed int				lavi_s32;
+typedef signed long long int	lavi_s64;
 #endif
 
-typedef s32 boolean;
+typedef lavi_s32 lavi_boolean;
 #define LAVI_FALSE  0
 #define LAVI_TRUE   1
 
@@ -58,6 +57,10 @@ typedef struct {
 typedef struct {
     float x, y;
 } pointf;
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 // API 
 struct lavi_api;
@@ -73,128 +76,128 @@ extern pointf LAVI_POINTF(float x, float y) { pointf p = {x,y}; return p; }
 //////////////////////
 
 typedef int  (__stdcall *lavi_wproc)();
-typedef void (__stdcall *lavi_WNDPROC)(void *hwnd, u32 message, size_t wparam, size_t lparam);
+typedef void (__stdcall *lavi_WNDPROC)(void *hwnd, lavi_u32 message, size_t wparam, size_t lparam);
 
 
 typedef struct {
-    s32  x;
-    s32  y;
+    lavi_s32  x;
+    lavi_s32  y;
 } POINT;
 typedef union {
     struct {
-        u32 LowPart;
-        s32 HighPart;
+        lavi_u32 LowPart;
+        lavi_s32 HighPart;
     } DUMMYSTRUCTNAME;
     struct {
-        u32 LowPart;
-        s32 HighPart;
+        lavi_u32 LowPart;
+        lavi_s32 HighPart;
     } u;
-    s64 QuadPart;
+    lavi_s64 QuadPart;
 } LARGE_INTEGER;
 typedef struct {
     void *        hwnd;
-    u32         message;
+    lavi_u32         message;
     size_t      wParam;
     size_t      lParam;
-    u32       time;
+    lavi_u32       time;
     POINT       pt;
 } MSG;
 typedef struct {
-    u16                               wButtons;
-    u8                                bLeftTrigger;
-    u8                                bRightTrigger;
-    s16                               sThumbLX;
-    s16                               sThumbLY;
-    s16                               sThumbRX;
-    s16                               sThumbRY;
+    lavi_u16                               wButtons;
+    lavi_u8                                bLeftTrigger;
+    lavi_u8                                bRightTrigger;
+    lavi_s16                               sThumbLX;
+    lavi_s16                               sThumbLY;
+    lavi_s16                               sThumbRX;
+    lavi_s16                               sThumbRY;
 } XINPUT_GAMEPAD;
 typedef struct {
-    u32                               dwPacketNumber;
+    lavi_u32                               dwPacketNumber;
     XINPUT_GAMEPAD                      Gamepad;
 } XINPUT_STATE;
-typedef u32   (__stdcall *XINPUTGETSTATE)(u32 dwUserIndex, XINPUT_STATE *pState);
+typedef lavi_u32   (__stdcall *XINPUTGETSTATE)(lavi_u32 dwUserIndex, XINPUT_STATE *pState);
 typedef struct {
-    u16 wLeftMotorSpeed;
-    u16 wRightMotorSpeed;
+    lavi_u16 wLeftMotorSpeed;
+    lavi_u16 wRightMotorSpeed;
 } XINPUT_VIBRATION;
 typedef struct {
-    s32    left;
-    s32    top;
-    s32    right;
-    s32    bottom;
+    lavi_s32    left;
+    lavi_s32    top;
+    lavi_s32    right;
+    lavi_s32    bottom;
 } RECT;
 typedef struct {
-    u32          style;
+    lavi_u32          style;
     lavi_WNDPROC lpfnWndProc;
-    int       cbClsExtra;
-    int       cbWndExtra;
+    lavi_s32       cbClsExtra;
+    lavi_s32       cbWndExtra;
     void *    hInstance;
     void *    hIcon;
     void *    hCursor;
     void *    hbrBackground;
-    char *    lpszMenuName;
-    char *    lpszClassName;
+    lavi_s8 * lpszMenuName;
+    lavi_s8 * lpszClassName;
 } WNDCLASSA;
 typedef struct {
-    u16  nSize;
-    u16  nVersion;
-    u32 dwFlags;
-    u8  iPixelType;
-    u8  cColorBits;
-    u8  cRedBits;
-    u8  cRedShift;
-    u8  cGreenBits;
-    u8  cGreenShift;
-    u8  cBlueBits;
-    u8  cBlueShift;
-    u8  cAlphaBits;
-    u8  cAlphaShift;
-    u8  cAccumBits;
-    u8  cAccumRedBits;
-    u8  cAccumGreenBits;
-    u8  cAccumBlueBits;
-    u8  cAccumAlphaBits;
-    u8  cDepthBits;
-    u8  cStencilBits;
-    u8  cAuxBuffers;
-    u8  iLayerType;
-    u8  bReserved;
-    u32 dwLayerMask;
-    u32 dwVisibleMask;
-    u32 dwDamageMask;
+    lavi_u16  nSize;
+    lavi_u16  nVersion;
+    lavi_u32 dwFlags;
+    lavi_u8  iPixelType;
+    lavi_u8  cColorBits;
+    lavi_u8  cRedBits;
+    lavi_u8  cRedShift;
+    lavi_u8  cGreenBits;
+    lavi_u8  cGreenShift;
+    lavi_u8  cBlueBits;
+    lavi_u8  cBlueShift;
+    lavi_u8  cAlphaBits;
+    lavi_u8  cAlphaShift;
+    lavi_u8  cAccumBits;
+    lavi_u8  cAccumRedBits;
+    lavi_u8  cAccumGreenBits;
+    lavi_u8  cAccumBlueBits;
+    lavi_u8  cAccumAlphaBits;
+    lavi_u8  cDepthBits;
+    lavi_u8  cStencilBits;
+    lavi_u8  cAuxBuffers;
+    lavi_u8  iLayerType;
+    lavi_u8  bReserved;
+    lavi_u32 dwLayerMask;
+    lavi_u32 dwVisibleMask;
+    lavi_u32 dwDamageMask;
 } PIXELFORMATDESCRIPTOR;
 typedef struct {
-    u32 dwType;
-    u32 dwSize;
+    lavi_u32 dwType;
+    lavi_u32 dwSize;
     void * hDevice;
     size_t wParam;
 } RAWINPUTHEADER;
 typedef struct {
-    u16 usFlags;
+    lavi_u16 usFlags;
     union {
-        u32 ulButtons;
+        lavi_u32 ulButtons;
         struct  {
-            u16  usButtonFlags;
-            u16  usButtonData;
+            lavi_u16  usButtonFlags;
+            lavi_u16  usButtonData;
         } s_param;
     } u_param;
-    u32 ulRawButtons;
-    s32 lLastX;
-    s32 lLastY;
-    s32 ulExtraInformation;
+    lavi_u32 ulRawButtons;
+    lavi_s32 lLastX;
+    lavi_s32 lLastY;
+    lavi_s32 ulExtraInformation;
 } RAWMOUSE;
 typedef struct {
-    u16 MakeCode;
-    u16 Flags;
-    u16 Reserved;
-    u16 VKey;
-    u32 Message;
-    u32 ExtraInformation;
+    lavi_u16 MakeCode;
+    lavi_u16 Flags;
+    lavi_u16 Reserved;
+    lavi_u16 VKey;
+    lavi_u32 Message;
+    lavi_u32 ExtraInformation;
 } RAWKEYBOARD;
 typedef struct {
-    u32 dwSizeHid;    
-    u32 dwCount;      
-    u8 bRawData[1];
+    lavi_u32 dwSizeHid;    
+    lavi_u32 dwCount;      
+    lavi_u8 bRawData[1];
 } RAWHID;
 typedef struct {
     RAWINPUTHEADER header;
@@ -205,136 +208,136 @@ typedef struct {
     } data;
 } RAWINPUT;
 typedef struct {
-    u16 usUsagePage; 
-    u16 usUsage;     
-    u32 dwFlags;
+    lavi_u16 usUsagePage; 
+    lavi_u16 usUsage;     
+    lavi_u32 dwFlags;
     void * hwndTarget;    
 } RAWINPUTDEVICE;
 typedef struct {
   void *hDevice;
-  u32 dwType;
+  lavi_u32 dwType;
 } RAWINPUTDEVICELIST;
 typedef struct {
-    u32 dwVendorId;
-    u32 dwProductId;
-    u32 dwVersionNumber;
+    lavi_u32 dwVendorId;
+    lavi_u32 dwProductId;
+    lavi_u32 dwVersionNumber;
 
     /*
      * Top level collection UsagePage and Usage
      */
-    u16 usUsagePage;
-    u16 usUsage;
+    lavi_u16 usUsagePage;
+    lavi_u16 usUsage;
 } RID_DEVICE_INFO_HID;
 typedef struct {
-    u32 cbSize;
-    u32 dwType;
+    lavi_u32 cbSize;
+    lavi_u32 dwType;
     union {
         // Removed mouse and keyboard 
         RID_DEVICE_INFO_HID hid;
     } param;
 } RID_DEVICE_INFO;
 typedef struct {
-    u16    UsagePage;
-    u8     ReportID;
-    u8     IsAlias;
+    lavi_u16    UsagePage;
+    lavi_u8     ReportID;
+    lavi_u8     IsAlias;
 
-    u16    BitField;
-    u16    LinkCollection;   // A unique internal index pointer
+    lavi_u16    BitField;
+    lavi_u16    LinkCollection;   // A unique internal index pointer
 
-    u16     LinkUsage;
-    u16     LinkUsagePage;
+    lavi_u16     LinkUsage;
+    lavi_u16     LinkUsagePage;
 
-    u8  IsRange;
-    u8  IsStringRange;
-    u8  IsDesignatorRange;
-    u8  IsAbsolute;
+    lavi_u8  IsRange;
+    lavi_u8  IsStringRange;
+    lavi_u8  IsDesignatorRange;
+    lavi_u8  IsAbsolute;
 
-    u16    ReportCount;   // Available in API version >= 2 only.
+    lavi_u16    ReportCount;   // Available in API version >= 2 only.
 
-    u16    Reserved2;
+    lavi_u16    Reserved2;
 
-    u32    Reserved[9];
+    lavi_u32    Reserved[9];
     union {
         struct {
-            u16     UsageMin,         UsageMax;
-            u16    StringMin,        StringMax;
-            u16    DesignatorMin,    DesignatorMax;
-            u16    DataIndexMin,     DataIndexMax;
+            lavi_u16     UsageMin,         UsageMax;
+            lavi_u16    StringMin,        StringMax;
+            lavi_u16    DesignatorMin,    DesignatorMax;
+            lavi_u16    DataIndexMin,     DataIndexMax;
         } Range;
         struct  {
-            u16     Usage,            Reserved1;
-            u16    StringIndex,      Reserved2;
-            u16    DesignatorIndex,  Reserved3;
-            u16    DataIndex,        Reserved4;
+            lavi_u16     Usage,            Reserved1;
+            lavi_u16    StringIndex,      Reserved2;
+            lavi_u16    DesignatorIndex,  Reserved3;
+            lavi_u16    DataIndex,        Reserved4;
         } NotRange;
     };
 } HIDP_BUTTON_CAPS;
 typedef struct {
-    u16     UsagePage;
-    u8    ReportID;
-    u8  IsAlias;
+    lavi_u16     UsagePage;
+    lavi_u8    ReportID;
+    lavi_u8  IsAlias;
 
-    u16    BitField;
-    u16    LinkCollection;   // A unique internal index pointer
+    lavi_u16    BitField;
+    lavi_u16    LinkCollection;   // A unique internal index pointer
 
-    u16     LinkUsage;
-    u16     LinkUsagePage;
+    lavi_u16     LinkUsage;
+    lavi_u16     LinkUsagePage;
 
-    u8  IsRange;
-    u8  IsStringRange;
-    u8  IsDesignatorRange;
-    u8  IsAbsolute;
+    lavi_u8  IsRange;
+    lavi_u8  IsStringRange;
+    lavi_u8  IsDesignatorRange;
+    lavi_u8  IsAbsolute;
 
-    u8  HasNull;        // Does this channel have a null report   union
-    u8    Reserved;
-    u16    BitSize;        // How many bits are devoted to this value?
+    lavi_u8  HasNull;        // Does this channel have a null report   union
+    lavi_u8    Reserved;
+    lavi_u16    BitSize;        // How many bits are devoted to this value?
 
-    u16    ReportCount;    // See Note below.  Usually set to 1.
-    u16    Reserved2[5];
+    lavi_u16    ReportCount;    // See Note below.  Usually set to 1.
+    lavi_u16    Reserved2[5];
 
-    u32    UnitsExp;
-    u32    Units;
+    lavi_u32    UnitsExp;
+    lavi_u32    Units;
 
-    s32     LogicalMin,       LogicalMax;
-    s32     PhysicalMin,      PhysicalMax;
+    lavi_s32     LogicalMin,       LogicalMax;
+    lavi_s32     PhysicalMin,      PhysicalMax;
 
     union {
         struct {
-            u16     UsageMin,         UsageMax;
-            u16    StringMin,        StringMax;
-            u16    DesignatorMin,    DesignatorMax;
-            u16    DataIndexMin,     DataIndexMax;
+            lavi_u16     UsageMin,         UsageMax;
+            lavi_u16    StringMin,        StringMax;
+            lavi_u16    DesignatorMin,    DesignatorMax;
+            lavi_u16    DataIndexMin,     DataIndexMax;
         } Range;
 
         struct {
-            u16     Usage,            Reserved1;
-            u16    StringIndex,      Reserved2;
-            u16    DesignatorIndex,  Reserved3;
-            u16    DataIndex,        Reserved4;
+            lavi_u16     Usage,            Reserved1;
+            lavi_u16    StringIndex,      Reserved2;
+            lavi_u16    DesignatorIndex,  Reserved3;
+            lavi_u16    DataIndex,        Reserved4;
         } NotRange;
     };
 } HIDP_VALUE_CAPS;
 typedef struct {
-    u16    Usage;
-    u16    UsagePage;
-    u16    InputReportByteLength;
-    u16    OutputReportByteLength;
-    u16    FeatureReportByteLength;
-    u16    Reserved[17];
+    lavi_u16    Usage;
+    lavi_u16    UsagePage;
+    lavi_u16    InputReportByteLength;
+    lavi_u16    OutputReportByteLength;
+    lavi_u16    FeatureReportByteLength;
+    lavi_u16    Reserved[17];
 
-    u16    NumberLinkCollectionNodes;
+    lavi_u16    NumberLinkCollectionNodes;
 
-    u16    NumberInputButtonCaps;
-    u16    NumberInputValueCaps;
-    u16    NumberInputDataIndices;
+    lavi_u16    NumberInputButtonCaps;
+    lavi_u16    NumberInputValueCaps;
+    lavi_u16    NumberInputDataIndices;
 
-    u16    NumberOutputButtonCaps;
-    u16    NumberOutputValueCaps;
-    u16    NumberOutputDataIndices;
+    lavi_u16    NumberOutputButtonCaps;
+    lavi_u16    NumberOutputValueCaps;
+    lavi_u16    NumberOutputDataIndices;
 
-    u16    NumberFeatureButtonCaps;
-    u16    NumberFeatureValueCaps;
-    u16    NumberFeatureDataIndices;
+    lavi_u16    NumberFeatureButtonCaps;
+    lavi_u16    NumberFeatureValueCaps;
+    lavi_u16    NumberFeatureDataIndices;
 } HIDP_CAPS;
 
 // Window Messages
@@ -585,52 +588,52 @@ typedef struct {
 
 /*               DLL       NAME                         RETVAL                      ARGS                                    */
 #define LAVI_WIN32_FUNCS \
-    LAVI_WINFUNC(kernel32, AttachConsole,               int,                        (u32 dwProcessId)) \
-    LAVI_WINFUNC(user32,   AdjustWindowRect,            int,                        (RECT *rect, u32 dwStyle, int bMenu)) \
+    LAVI_WINFUNC(kernel32, AttachConsole,               int,                        (lavi_u32 dwProcessId)) \
+    LAVI_WINFUNC(user32,   AdjustWindowRect,            int,                        (RECT *rect, lavi_u32 dwStyle, int bMenu)) \
     LAVI_WINFUNC(gdi32,    ChoosePixelFormat,           int,                        (void *hdc, const PIXELFORMATDESCRIPTOR *pfd)) \
     LAVI_WINFUNC(user32,   ClientToScreen,              int,                        (void *hwnd, POINT *lpPoint)) \
     LAVI_WINFUNC(kernel32, ConvertThreadToFiber,        void *,                     (void *lpParam)) \
-    LAVI_WINFUNC(kernel32, CreateEventA,                void * ,                    (void *lpEventAttribs, int bManualReset, boolean bInitialState, char *lpName)) \
+    LAVI_WINFUNC(kernel32, CreateEventA,                void * ,                    (void *lpEventAttribs, int bManualReset, lavi_boolean bInitialState, char *lpName)) \
     LAVI_WINFUNC(kernel32, CreateFiber,                 void * ,                    (size_t dwStackSize, lavi_wproc *lpStartAddress, void *lpParam)) \
-    LAVI_WINFUNC(user32,   CreateWindowExA,             void *,                     (s32 dwExStyle, const char *lpClassName, const char *lpWindowName, s32 dwStyle, int x, int y, int w, int h, void * hwndParent, void *hMenu, void *hInstance, void *lpParam)) \
-    LAVI_WINFUNC(user32,   DefWindowProcA,              size_t,                     (void *hwnd, u32 message, size_t wparam, size_t lparam)) \
-    LAVI_WINFUNC(gdi32,    DescribePixelFormat,         int,                        (void *hdc, int iPixelFormat, u32 nBytes, PIXELFORMATDESCRIPTOR *pfd)) \
+    LAVI_WINFUNC(user32,   CreateWindowExA,             void *,                     (lavi_s32 dwExStyle, const char *lpClassName, const char *lpWindowName, lavi_s32 dwStyle, int x, int y, int w, int h, void * hwndParent, void *hMenu, void *hInstance, void *lpParam)) \
+    LAVI_WINFUNC(user32,   DefWindowProcA,              size_t,                     (void *hwnd, lavi_u32 message, size_t wparam, size_t lparam)) \
+    LAVI_WINFUNC(gdi32,    DescribePixelFormat,         int,                        (void *hdc, int iPixelFormat, lavi_u32 nBytes, PIXELFORMATDESCRIPTOR *pfd)) \
     LAVI_WINFUNC(user32,   DestroyWindow,               int,                        (void *hwnd)) \
     LAVI_WINFUNC(user32,   DispatchMessageA,            size_t,                     (const MSG *message)) \
     LAVI_WINFUNC(user32,   GetClientRect,               int,                        (void * hwnd, RECT *rect)) \
     LAVI_WINFUNC(kernel32, GetConsoleWindow,            void * ,                    (void)) \
     LAVI_WINFUNC(user32,   GetDC,                       void *,                     (void * hwnd)) \
-    LAVI_WINFUNC(user32,   GetKeyboardState,            int,                        (u8 *lpKeyState)) \
-    LAVI_WINFUNC(user32,   GetLastError,                s32 ,                       (void)) \
-    LAVI_WINFUNC(user32,   GetWindowLongPtrA,           s64,                        (void *hwnd, int nIndex)) \
+    LAVI_WINFUNC(user32,   GetKeyboardState,            int,                        (lavi_u8 *lpKeyState)) \
+    LAVI_WINFUNC(user32,   GetLastError,                lavi_s32 ,                       (void)) \
+    LAVI_WINFUNC(user32,   GetWindowLongPtrA,           lavi_s64,                        (void *hwnd, int nIndex)) \
     LAVI_WINFUNC(kernel32, GetProcessHeap,              void *,                     (void)) \
-    LAVI_WINFUNC(user32,   GetRawInputData,             u32,                        (void *hRawInput, u32 uiCmd, void *pData, u32 *pcbSize, u32 cbSizeHeader)) \
-    LAVI_WINFUNC(user32,   GetRawInputDeviceInfoA,      u32,                        (void *hDevice, u32 uiCmd, void *data, u32 *size)) \
-    LAVI_WINFUNC(user32,   GetRawInputDeviceList,       u32,                        (void *RawinputDeviceList, u32 *NumDevices, u32 cbSize)) \
-     LAVI_WINFUNC(hid,     HidP_GetButtonCaps,          s32,                        (s32 report_type, HIDP_BUTTON_CAPS *button_caps, u16 *button_caps_length, void *ppd)) \
-    LAVI_WINFUNC(hid,      HidP_GetCaps,                s32,                        (void *ppd, HIDP_CAPS *caps)) \
-    LAVI_WINFUNC(hid,      HidD_GetManufacturerString,  u8,                         (void *hHid, void *buffer, u32 buffer_length)) \
-    LAVI_WINFUNC(hid,      HidP_GetUsages,              s32,                        (s32 report_type, u16 usage_page, u16 link_collection, u16 *usage_list, u32 *usage_length, void *ppd, char *report, u32 report_length)) \
-    LAVI_WINFUNC(hid,      HidP_GetUsageValue,          s32,                        (s32 report_type, u16 usage_page, u16 link_collection, u16 usage, u32 *usage_value, void *ppd, char *report, u32 report_length)) \
-    LAVI_WINFUNC(hid,      HidP_GetValueCaps,           s32,                        (s32 report_type, HIDP_VALUE_CAPS *value_caps, u16 *value_caps_length, void *ppd)) \
-    LAVI_WINFUNC(kernel32, HeapAlloc,                   void *,                     (void *hHeap, u64 idEvent, size_t dwBytes)) \
-    LAVI_WINFUNC(kernel32, HeapFree,                    int,                        (void *hHeap, s32 dwFlags, void *lpMem)) \
-    LAVI_WINFUNC(user32,   KillTimer,                   int,                        (void *hwnd, u64 idEvent)) \
+    LAVI_WINFUNC(user32,   GetRawInputData,             lavi_u32,                        (void *hRawInput, lavi_u32 uiCmd, void *pData, lavi_u32 *pcbSize, lavi_u32 cbSizeHeader)) \
+    LAVI_WINFUNC(user32,   GetRawInputDeviceInfoA,      lavi_u32,                        (void *hDevice, lavi_u32 uiCmd, void *data, lavi_u32 *size)) \
+    LAVI_WINFUNC(user32,   GetRawInputDeviceList,       lavi_u32,                        (void *RawinputDeviceList, lavi_u32 *NumDevices, lavi_u32 cbSize)) \
+     LAVI_WINFUNC(hid,     HidP_GetButtonCaps,          lavi_s32,                        (lavi_s32 report_type, HIDP_BUTTON_CAPS *button_caps, lavi_u16 *button_caps_length, void *ppd)) \
+    LAVI_WINFUNC(hid,      HidP_GetCaps,                lavi_s32,                        (void *ppd, HIDP_CAPS *caps)) \
+    LAVI_WINFUNC(hid,      HidD_GetManufacturerString,  lavi_u8,                         (void *hHid, void *buffer, lavi_u32 buffer_length)) \
+    LAVI_WINFUNC(hid,      HidP_GetUsages,              lavi_s32,                        (lavi_s32 report_type, lavi_u16 usage_page, lavi_u16 link_collection, lavi_u16 *usage_list, lavi_u32 *usage_length, void *ppd, char *report, lavi_u32 report_length)) \
+    LAVI_WINFUNC(hid,      HidP_GetUsageValue,          lavi_s32,                        (lavi_s32 report_type, lavi_u16 usage_page, lavi_u16 link_collection, lavi_u16 usage, lavi_u32 *usage_value, void *ppd, char *report, lavi_u32 report_length)) \
+    LAVI_WINFUNC(hid,      HidP_GetValueCaps,           lavi_s32,                        (lavi_s32 report_type, HIDP_VALUE_CAPS *value_caps, lavi_u16 *value_caps_length, void *ppd)) \
+    LAVI_WINFUNC(kernel32, HeapAlloc,                   void *,                     (void *hHeap, lavi_u64 idEvent, size_t dwBytes)) \
+    LAVI_WINFUNC(kernel32, HeapFree,                    int,                        (void *hHeap, lavi_s32 dwFlags, void *lpMem)) \
+    LAVI_WINFUNC(user32,   KillTimer,                   int,                        (void *hwnd, lavi_u64 idEvent)) \
     LAVI_WINFUNC(kernel32, OutputDebugStringA,          void,                       (const char *str)) \
-    LAVI_WINFUNC(user32,   MessageBoxA,                 int,                        (void *hwnd, const char *lpText, const char *lpCaption, u32 uType)) \
-    LAVI_WINFUNC(user32,   PeekMessageA,                int,                        (MSG *lpMsg, void *, u32 wMsgFilterMin, u32 wMsgFilterMax, u32 wRemoveMsg)) \
+    LAVI_WINFUNC(user32,   MessageBoxA,                 int,                        (void *hwnd, const char *lpText, const char *lpCaption, lavi_u32 uType)) \
+    LAVI_WINFUNC(user32,   PeekMessageA,                int,                        (MSG *lpMsg, void *, lavi_u32 wMsgFilterMin, lavi_u32 wMsgFilterMax, lavi_u32 wRemoveMsg)) \
     LAVI_WINFUNC(kernel32, QueryPerformanceCounter,     int,                        (LARGE_INTEGER *counter)) \
     LAVI_WINFUNC(kernel32, QueryPerformanceFrequency,   int,                        (LARGE_INTEGER *freq)) \
-    LAVI_WINFUNC(user32,   RegisterClassA,              u16,                        (const WNDCLASSA *lpWindowClass)) \
-    LAVI_WINFUNC(user32,   RegisterRawInputDevices,     int,                        (RAWINPUTDEVICE *pRawInputDevice, u32 nDevices, u32 cbSize)) \
+    LAVI_WINFUNC(user32,   RegisterClassA,              lavi_u16,                        (const WNDCLASSA *lpWindowClass)) \
+    LAVI_WINFUNC(user32,   RegisterRawInputDevices,     int,                        (RAWINPUTDEVICE *pRawInputDevice, lavi_u32 nDevices, lavi_u32 cbSize)) \
     LAVI_WINFUNC(gdi32,    SetPixelFormat,              int,                        (void *hdc,  int fmt, const PIXELFORMATDESCRIPTOR *pfd))  \
-    LAVI_WINFUNC(user32,   SetTimer,                    u64,                        (void *hwnd, u64 nIDEvent, u32 uElapse, lavi_wproc *lpTimerFunc)) \
-    LAVI_WINFUNC(user32,   SetWindowLongPtrA,           s64,                        (void *hwnd, int nIndex, s64 dwNewLong)) \
+    LAVI_WINFUNC(user32,   SetTimer,                    lavi_u64,                        (void *hwnd, lavi_u64 nIDEvent, lavi_u32 uElapse, lavi_wproc *lpTimerFunc)) \
+    LAVI_WINFUNC(user32,   SetWindowLongPtrA,           lavi_s64,                        (void *hwnd, int nIndex, lavi_s64 dwNewLong)) \
     LAVI_WINFUNC(user32,   ShowWindow,                  int,                        (void *hwnd, int nCmdShow)) \
-    LAVI_WINFUNC(kernel32, Sleep,                       void,                       (u32 milliseconds)) \
+    LAVI_WINFUNC(kernel32, Sleep,                       void,                       (lavi_u32 milliseconds)) \
     LAVI_WINFUNC(gdi32,    SwapBuffers,                 int,                        (void *hdc)) \
     LAVI_WINFUNC(kernel32, SwitchToFiber,               void,                       (void *lpFiber)) \
-    LAVI_WINFUNC(winmm,    timeBeginPeriod,             u32,                        (u32 uperiod)) \
+    LAVI_WINFUNC(winmm,    timeBeginPeriod,             lavi_u32,                        (lavi_u32 uperiod)) \
     LAVI_WINFUNC(user32,   TranslateMessage,            size_t,                     (MSG *message)) \
     LAVI_WINFUNC(user32,   UpdateWindow,                int,                        (void *hwnd)) 
 
@@ -640,17 +643,17 @@ LAVI_WIN32_FUNCS
 #undef LAVI_WINFUNC
 
 typedef struct {
-    boolean is_down;
-    boolean is_pressed;
-    boolean is_released;
+    lavi_boolean is_down;
+    lavi_boolean is_pressed;
+    lavi_boolean is_released;
 } lavi_digitalbutton;
 
 typedef struct {
     float threshold;
     float value;
-    boolean is_down;
-    boolean is_pressed;
-    boolean is_released;
+    lavi_boolean is_down;
+    lavi_boolean is_pressed;
+    lavi_boolean is_released;
 } lavi_analogbutton;
 
 typedef struct {
@@ -660,7 +663,7 @@ typedef struct {
 
 typedef struct {
     /* XBOX/XInput profile */
-    boolean connected;
+    lavi_boolean connected;
     lavi_digitalbutton a, 
                        b, 
                        y, 
@@ -687,14 +690,14 @@ typedef struct {
     HIDP_BUTTON_CAPS *b_caps;
     HIDP_VALUE_CAPS  *v_vaps;
     HIDP_CAPS caps;
-    u32 ppd_count;
-    u16 b_caps_count;
-    u16 v_caps_count;
+    lavi_u32 ppd_count;
+    lavi_u16 b_caps_count;
+    lavi_u16 v_caps_count;
 } _hid;
 
 typedef struct {
     struct {
-        boolean connected;
+        lavi_boolean connected;
         // Struct for user to interface gamepad with 
         lavi_digitalbutton dpad_up,
                            dpad_down,
@@ -712,7 +715,7 @@ enum {
 };
 
 static void
-lavi_hid_set_gamepad_profile(lavi_hid *hid, s32 gamepad_profile_id)
+lavi_hid_set_gamepad_profile(lavi_hid *hid, lavi_s32 gamepad_profile_id)
 {
     switch (gamepad_profile_id) {
     case HID_GAMEPAD_N64:
@@ -738,8 +741,8 @@ typedef struct {
 
 typedef struct lavi_api lavi_api;
 struct lavi_api {
-    boolean quit;
-    boolean initialized;
+    lavi_boolean quit;
+    lavi_boolean initialized;
 
     struct {
         const char *name;
@@ -749,40 +752,40 @@ struct lavi_api {
 
     struct {
         float	delta_sec;
-        u64     delta_ticks;    // raw 
-        u64		delta_ns;
-        u64		delta_mu;
-        u64		delta_ms;
-        u64		delta_samples;
-        u64		delta_nanoseconds;
-        u64		delta_microseconds;
-        u64		delta_milliseconds;
+        lavi_u64     delta_ticks;    // raw 
+        lavi_u64		delta_ns;
+        lavi_u64		delta_mu;
+        lavi_u64		delta_ms;
+        lavi_u64		delta_samples;
+        lavi_u64		delta_nanoseconds;
+        lavi_u64		delta_microseconds;
+        lavi_u64		delta_milliseconds;
 
 
         double	time_sec;
-        u64     time_ticks;
-        u64		time_ns;
-        u64		time_mu;
-        u64		time_ms;
-        u64		time_nanoseconds;
-        u64		time_microseconds;
-        u64		time_milliseconds;
+        lavi_u64     time_ticks;
+        lavi_u64		time_ns;
+        lavi_u64		time_mu;
+        lavi_u64		time_ms;
+        lavi_u64		time_nanoseconds;
+        lavi_u64		time_microseconds;
+        lavi_u64		time_milliseconds;
 
         // lower-level
-        u64     initial_ticks;  
-        u64     curr_ticks;
-        u64     ticks_per_sec;  // raw
+        lavi_u64     initial_ticks;  
+        lavi_u64     curr_ticks;
+        lavi_u64     ticks_per_sec;  // raw
     } time;
 
     struct {
         LARGE_INTEGER freq, 
                       start, 
                       end; 
-        u64 counter_freq;
+        lavi_u64 counter_freq;
         float elapsed, 
               target_elasped,
               ms_per_frame;
-        boolean is_granular;
+        lavi_boolean is_granular;
 
     } timestep;
 
@@ -814,7 +817,7 @@ lavi_console_attach(void)
     // printf to the console via MSVC does not work, we work around that   
     // by attaching THIS process to the console, in my case CMD.
 
-    lavi_AttachConsole((u32)-1);
+    lavi_AttachConsole((lavi_u32)-1);
 
     if (lavi_GetConsoleWindow() != NULL) {
         freopen("CONOUT$", "w", stdout);
@@ -880,8 +883,8 @@ get_seconds_elapsed(LARGE_INTEGER start, LARGE_INTEGER end)
 static void
 register_rawinput(void)
 {
-    u32 i;
-    u16 dev_usage[] = {
+    lavi_u32 i;
+    lavi_u16 dev_usage[] = {
         0x02,   // HID mouse 
         0x06,   // HID keyboard
         0x04,   
@@ -911,9 +914,9 @@ static void
 getinfo_rawinput(void *hdevice)
 {
     RID_DEVICE_INFO *rdi = NULL;
-    u32 rdi_cnt = 0;
+    lavi_u32 rdi_cnt = 0;
     void *hheap = lavi_GetProcessHeap();
-    if (lavi_GetRawInputDeviceInfoA(hdevice, RIDI_DEVICEINFO, NULL, &rdi_cnt) == (u32)-1) {
+    if (lavi_GetRawInputDeviceInfoA(hdevice, RIDI_DEVICEINFO, NULL, &rdi_cnt) == (lavi_u32)-1) {
         goto cleanup;
     }
 
@@ -941,10 +944,10 @@ static void
 enumerate_rawinput(void)
 {
     RAWINPUTDEVICELIST *rid_list = NULL;
-    u32 i, count = 0;
+    lavi_u32 i, count = 0;
     void *hheap = lavi_GetProcessHeap();
 
-    if (lavi_GetRawInputDeviceList(NULL, &count, sizeof(RAWINPUTDEVICELIST)) == (u32)-1) {
+    if (lavi_GetRawInputDeviceList(NULL, &count, sizeof(RAWINPUTDEVICELIST)) == (lavi_u32)-1) {
         goto cleanup;
     }
 
@@ -995,9 +998,9 @@ lavi_load_dlls(void)
 
 // Update 
 static void
-lavi_update_digitalbutton(lavi_digitalbutton *button, boolean is_down)
+lavi_update_digitalbutton(lavi_digitalbutton *button, lavi_boolean is_down)
 {
-    boolean was_down = button->is_down;
+    lavi_boolean was_down = button->is_down;
     button->is_down = is_down;
     button->is_pressed = !was_down && is_down;
     button->is_released = was_down && !is_down;
@@ -1006,7 +1009,7 @@ lavi_update_digitalbutton(lavi_digitalbutton *button, boolean is_down)
 static void
 lavi_update_analogbutton(lavi_analogbutton *analog, float value)
 {
-    boolean was_down = analog->is_down;
+    lavi_boolean was_down = analog->is_down;
     analog->value = value;
     analog->is_down = (value >= analog->threshold);
     analog->is_pressed = !was_down && analog->is_down;
@@ -1046,14 +1049,14 @@ static void
 lavi_pull_keyboard(void)
 {
     int i;
-    u8 keyboard_state[256];
+    lavi_u8 keyboard_state[256];
 
     if (!lavi_GetKeyboardState(keyboard_state)) {
         return;
     }
 
     for (i = 0; i < LAVI_MAX_KEYS; i++) {
-        u8 key = keyboard_state[i];
+        lavi_u8 key = keyboard_state[i];
         lavi_update_digitalbutton(g_api->keys + i, keyboard_state[i] >> 7);
     }
 }
@@ -1107,13 +1110,13 @@ static void
 lavi_pull_tick(void)
 {
     LARGE_INTEGER counter, freq;
-    u64 curr_ticks;
+    lavi_u64 curr_ticks;
 
     lavi_QueryPerformanceCounter(&counter);
-    lavi_QueryPerformanceCounter(&freq);
     curr_ticks = counter.QuadPart;
 
-    g_api->time.delta_ticks = curr_ticks - g_api->time.time_ticks;
+    g_api->time.delta_ticks = curr_ticks - g_api->time.curr_ticks;
+    g_api->time.curr_ticks = curr_ticks;
     g_api->time.time_ticks = curr_ticks - g_api->time.initial_ticks;
 
     g_api->time.delta_nanoseconds = (1000 * 1000 * 1000 * g_api->time.delta_ticks) / g_api->time.ticks_per_sec;
@@ -1124,7 +1127,7 @@ lavi_pull_tick(void)
     g_api->time.time_nanoseconds = (1000 * 1000 * 1000 * g_api->time.time_ticks) / g_api->time.ticks_per_sec;
     g_api->time.time_microseconds = g_api->time.time_nanoseconds / 1000;
     g_api->time.time_milliseconds = g_api->time.time_microseconds / 1000;
-    g_api->time.time_sec = (double)g_api->time.time_ticks / (double)g_api->time.ticks_per_sec; 
+    g_api->time.time_sec = (double)g_api->time.time_ticks / (double)g_api->time.ticks_per_sec;
 }
 
 static void
@@ -1161,7 +1164,7 @@ lavi_push_fixed_timestep(void)
 
     if (g_api->timestep.elapsed < g_api->timestep.target_elasped) {
         if (g_api->timestep.is_granular) {
-            u32 ms = (u32)(1000.0f * (g_api->timestep.target_elasped - g_api->timestep.elapsed));
+            lavi_u32 ms = (lavi_u32)(1000.0f * (g_api->timestep.target_elasped - g_api->timestep.elapsed));
             if (ms > 0) {
                 lavi_Sleep(ms);
             }
@@ -1200,12 +1203,12 @@ lavi_update_rawinput(RAWINPUT *ri)
     HIDP_CAPS caps = {0};
     HIDP_BUTTON_CAPS *b_caps = NULL;
     HIDP_VALUE_CAPS  *v_caps = NULL; 
-    u32 ppd_count;
-    u16 b_caps_count, v_caps_count;
+    lavi_u32 ppd_count;
+    lavi_u16 b_caps_count, v_caps_count;
     void *hheap = lavi_GetProcessHeap();
-    u32 button_count = 0;
+    lavi_u32 button_count = 0;
     
-    if (lavi_GetRawInputDeviceInfoA(ri->header.hDevice, RIDI_PREPARSEDDATA, NULL, &ppd_count) == (u32)-1) {
+    if (lavi_GetRawInputDeviceInfoA(ri->header.hDevice, RIDI_PREPARSEDDATA, NULL, &ppd_count) == (lavi_u32)-1) {
         goto cleanup;
     }
     ppd = (void *)lavi_HeapAlloc(lavi_GetProcessHeap(), HEAP_ZERO_MEMORY, ppd_count);
@@ -1238,9 +1241,9 @@ lavi_update_rawinput(RAWINPUT *ri)
     lavi_HidP_GetValueCaps(0, v_caps, &v_caps_count, ppd);
     
     {
-        u16 i;
+        lavi_u16 i;
         for (i = 0; i < b_caps_count; i++) {
-            u32 value;
+            lavi_u32 value;
             lavi_HidP_GetUsageValue(0, v_caps[i].UsagePage, 0, v_caps[i].Range.UsageMin, &value, ppd, (char *)ri->data.hid.bRawData, ri->data.hid.dwSizeHid);
             //printf("%d:%d \n", i, value);
         }
@@ -1249,10 +1252,10 @@ lavi_update_rawinput(RAWINPUT *ri)
 
 #if 0
     {
-        boolean is_down;
-        u32 i;
-        u16 usage_list[LAVI_MAX_USAGE_KEYS];
-        u32 usage_length = 0;
+        lavi_boolean is_down;
+        lavi_u32 i;
+        lavi_u16 usage_list[LAVI_MAX_USAGE_KEYS];
+        lavi_u32 usage_length = 0;
         (lavi_HidP_GetUsages(0, b_caps->UsagePage, 0, usage_list, &usage_length, ppd, (char *)ri->data.hid.bRawData, ri->data.hid.dwSizeHid));
         
         //printf("usage_length: %d\n", usage_length);   
@@ -1293,7 +1296,7 @@ lavi_message_fiber_proc(void)
 
 static size_t __stdcall 
 lavi_main_proc(void *hwnd,
-               u32 message,
+               lavi_u32 message,
                size_t wparam,
                size_t lparam)
 {
@@ -1303,10 +1306,10 @@ lavi_main_proc(void *hwnd,
     switch (message) {
     case WM_INPUT: {
         RAWINPUT *ri = NULL;
-        u32 ri_size = 0;
+        lavi_u32 ri_size = 0;
         void *hheap = lavi_GetProcessHeap();
             
-        if (lavi_GetRawInputData((void *)lparam, RID_INPUT, NULL, &ri_size, sizeof(RAWINPUTHEADER)) == (u32)-1) {
+        if (lavi_GetRawInputData((void *)lparam, RID_INPUT, NULL, &ri_size, sizeof(RAWINPUTHEADER)) == (lavi_u32)-1) {
             goto cleanup;
         }
 
@@ -1319,9 +1322,9 @@ lavi_main_proc(void *hwnd,
         }
 
         if (ri->header.dwType == RIM_TYPEMOUSE && ri->data.mouse.usFlags == MOUSE_MOVE_RELATIVE) {
-            u16 button_flags;
-            boolean lbutton_down;
-            boolean rbutton_down;
+            lavi_u16 button_flags;
+            lavi_boolean lbutton_down;
+            lavi_boolean rbutton_down;
 
             api->mouse.dt_pos.x += ri->data.mouse.lLastX;
             api->mouse.dt_pos.y += ri->data.mouse.lLastY;
@@ -1342,7 +1345,7 @@ lavi_main_proc(void *hwnd,
             lavi_update_digitalbutton(&api->mouse.rbutton, rbutton_down);
 
             if (button_flags & RI_MOUSE_WHEEL) 
-                api->mouse.dt_wheel += ((s16)ri->data.mouse.u_param.s_param.usButtonData) / WHEEL_DELTA;
+                api->mouse.dt_wheel += ((lavi_s16)ri->data.mouse.u_param.s_param.usButtonData) / WHEEL_DELTA;
         }
 
         //lavi_update_rawinput(ri);
@@ -1379,7 +1382,7 @@ cleanup:
 
 
 // Init 
-static boolean 
+static lavi_boolean 
 lavi_init_window(void)
 {
     RECT rect;
@@ -1389,7 +1392,7 @@ lavi_init_window(void)
     int win_height;
     
     wc.lpfnWndProc = (lavi_WNDPROC)lavi_main_proc;
-    wc.lpszClassName = "Lavi";
+    wc.lpszClassName = (lavi_s8 *)"Lavi";
     wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
     
     if (!lavi_RegisterClassA(&wc)) {
@@ -1440,12 +1443,12 @@ lavi_init_window(void)
     
 
     //lavi_fatal("CreateWindowA failed");
-    g_api->win32.hwnd = lavi_CreateWindowExA(0, wc.lpszClassName, g_api->window.name, WS_OVERLAPPEDWINDOW | WS_VISIBLE, win_pos.x, win_pos.y, win_width, win_height, 0, 0, 0, 0);
+    g_api->win32.hwnd = lavi_CreateWindowExA(0, (const char *)wc.lpszClassName, g_api->window.name, WS_OVERLAPPEDWINDOW | WS_VISIBLE, win_pos.x, win_pos.y, win_width, win_height, 0, 0, 0, 0);
     if (!g_api->win32.hwnd) {
         lavi_fatal("CreateWindowA failed");
     }
 
-    lavi_SetWindowLongPtrA(g_api->win32.hwnd, GWLP_USERDATA, (s64)g_api);
+    lavi_SetWindowLongPtrA(g_api->win32.hwnd, GWLP_USERDATA, (lavi_s64)g_api);
     lavi_ShowWindow(g_api->win32.hwnd, 1);
     lavi_UpdateWindow(g_api->win32.hwnd);
 
@@ -1454,7 +1457,7 @@ lavi_init_window(void)
     return LAVI_TRUE;
 }
 
-static boolean 
+static lavi_boolean 
 lavi_init_tick(void)
 {
     LARGE_INTEGER freq, counter;
@@ -1503,7 +1506,7 @@ opengl_get_func(const char *func_name)
 
 }
 
-static boolean
+static lavi_boolean
 lavi_init_opengl(void)
 {
     PIXELFORMATDESCRIPTOR pfd = {
@@ -1617,5 +1620,9 @@ WinMain(void *instance,
     return 0;
 }
 
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* LAVI_PLATFORM_H */
